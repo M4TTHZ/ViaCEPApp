@@ -14,6 +14,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ViaCEPApp">
         <activity
+            android:name=".view.ConfirmacaoActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.HistoricoActivity"
             android:exported="false" />
         <activity

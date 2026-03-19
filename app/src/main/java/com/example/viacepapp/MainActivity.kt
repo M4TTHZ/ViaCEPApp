@@ -1,6 +1,7 @@
 // MainActivity.kt
 package com.example.viacepapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -14,11 +15,9 @@ import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import com.example.viacepapp.Model.Endereco
 import com.example.viacepapp.Service.RetrofitClient
+import com.example.viacepapp.view.ConfirmacaoActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -67,6 +66,22 @@ class MainActivity : AppCompatActivity() {
 
         btnConfirmar.setOnClickListener {
             confirmarEndereco()
+
+            val endereco = Endereco(
+                cep = etCep.text.toString(),
+                logradouro = etLogradouro.text.toString(),
+                complemento = etComplemento.text.toString(),
+                bairro = etBairro.text.toString(),
+                localidade = etCidade.text.toString(),
+                uf = etUf.text.toString(),
+                numero = etNumero.text.toString()
+            )
+
+            val intent = Intent(this, ConfirmacaoActivity::class.java)
+
+            intent.putExtra("endereco", endereco)
+
+            startActivity(intent)
         }
 
         btnHistorico.setOnClickListener {
@@ -144,7 +159,8 @@ class MainActivity : AppCompatActivity() {
         etBairro.text?.clear()
         etCidade.text?.clear()
         etUf.text?.clear()
-        // Não limpa número e complemento
+        etComplemento.text?.clear()
+        etNumero.text?.clear()
     }
 
     private fun mostrarCarregamento(mostrar: Boolean) {

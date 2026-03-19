@@ -1,5 +1,7 @@
 package com.example.viacepapp.Model
 
+import java.io.Serializable
+
 data class Endereco(
     val cep: String,
     val logradouro: String,
@@ -7,9 +9,6 @@ data class Endereco(
     val bairro: String,
     val localidade: String,
     val uf: String,
-    val ibge: String?,
-    val gia: String?,
-    val ddd: String?,
-    val siafi: String?,
-    val erro: Boolean = false // Para casos de CEP inválido
-)
+    val erro: Boolean = false, // Para casos de CEP inválido
+    val numero: String
+) : Serializable
