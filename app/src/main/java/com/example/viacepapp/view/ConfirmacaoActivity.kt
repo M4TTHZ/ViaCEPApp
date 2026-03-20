@@ -1,17 +1,17 @@
 package com.example.viacepapp.view
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.viacepapp.R
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import com.example.viacepapp.Model.Endereco
 
 class ConfirmacaoActivity : AppCompatActivity() {
-
     // Referências para os elementos da tela
     private lateinit var tvResumoEndereco: TextView
     private lateinit var tvCep: TextView
@@ -24,17 +24,22 @@ class ConfirmacaoActivity : AppCompatActivity() {
     private lateinit var btnConfirmar: Button
     private lateinit var btnCancelar: Button
 
+    private lateinit var endereco: Endereco
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_confirmacao)
 
-
         inicializarViews()
         getEndereco()
         configurarListeners()
 
+        // Habilitar o botão de voltar na ActionBar
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "Confirmar Endereço"
     }
+
     private fun inicializarViews() {
         tvResumoEndereco = findViewById(R.id.tvResumoEndereco)
         tvCep = findViewById(R.id.tvCep)
@@ -48,33 +53,56 @@ class ConfirmacaoActivity : AppCompatActivity() {
         btnCancelar = findViewById(R.id.btnCancelar)
     }
 
-    private fun getEndereco(){
-        val endereco = intent.getSerializableExtra("endereco") as? Endereco
 
-        if (endereco != null) {
-            tvResumoEndereco.text = "${endereco.logradouro}, ${endereco.numero} - ${endereco.bairro}, ${endereco.localidade} - ${endereco.uf}"
-            tvCep.text = "${endereco.cep}"
-            tvLogradouro.text = "${endereco.logradouro}"
-            tvNumero.text = "${endereco.numero}"
-            tvComplemento.text = "${endereco.complemento}"
-            tvBairro.text = "${endereco.bairro}"
-            tvCidadeUf.text = "${endereco.localidade} - ${endereco.uf}"
-        }
+    private fun getEndereco() {
+        endereco = intent.getSerializableExtra("endereco") as? Endereco
+            ?: run {
+                Toast.makeText(this, "Erro: endereço não encontrado", Toast.LENGTH_SHORT).show()
+                finish()
+                return
+            }
+
+        tvResumoEndereco.text = "${endereco.logradouro}, ${endereco.numero} - ${endereco.bairro}, ${endereco.localidade} - ${endereco.uf}"
+        tvCep.text = endereco.cep
+        tvLogradouro.text = endereco.logradouro
+        tvNumero.text = endereco.numero
+        tvComplemento.text = if (endereco.complemento.isBlank()) "Não informado" else endereco.complemento
+        tvBairro.text = endereco.bairro
+        tvCidadeUf.text = "${endereco.localidade} - ${endereco.uf}"
     }
 
-
     private fun configurarListeners() {
+        // BOTÃO EDITAR - Volta normalmente (NÃO limpa campos)
         btnEditar.setOnClickListener {
-            finish() // Volta para a MainActivity para editar o endereço
+            setResult(RESULT_OK)  // RESULT_OK para NÃO limpar
+            finish()
         }
 
         btnConfirmar.setOnClickListener {
-            // Aqui você pode implementar a lógica para salvar o endereço confirmado
-            finish() // Fecha a ConfirmacaoActivity após confirmar
+            setResult(RESULT_CANCELED)  // RESULT_OK para NÃO limpar
+            finish()
         }
 
         btnCancelar.setOnClickListener {
+            // RESULT_CANCELED faz a MainActivity limpar os campos
+            setResult(RESULT_CANCELED)
             finish()
         }
+    }
+
+    // Botão voltar da ActionBar
+    override fun onSupportNavigateUp(): Boolean {
+        // Voltar NÃO limpa campos
+        setResult(RESULT_OK)
+        finish()
+        return true
+    }
+
+    // Botão voltar físico
+    @SuppressLint("GestureBackNavigation")
+    override fun onBackPressed() {
+        // Voltar NÃO limpa campos
+        setResult(RESULT_OK)
+        super.onBackPressed()
     }
 }

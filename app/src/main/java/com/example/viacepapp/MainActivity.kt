@@ -1,4 +1,3 @@
-// MainActivity.kt
 package com.example.viacepapp
 
 import android.content.Intent
@@ -9,6 +8,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputEditText
@@ -34,6 +34,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnHistorico: Button
     private lateinit var progressBar: ProgressBar
     private lateinit var tvErro: TextView
+
+    // Launcher para abrir ConfirmacaoActivity
+    private val confirmarLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_CANCELED) {
+            // Quando voltar da ConfirmacaoActivity com CANCELED, limpa os campos
+            limparTodosCampos()
+            Toast.makeText(this, "Operação cancelada", Toast.LENGTH_SHORT).show()
+        }
+        // Se for RESULT_OK, não faz nada (mantém os campos)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,34 +77,58 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnConfirmar.setOnClickListener {
-            confirmarEndereco()
-
-            val endereco = Endereco(
-                cep = etCep.text.toString(),
-                logradouro = etLogradouro.text.toString(),
-                complemento = etComplemento.text.toString(),
-                bairro = etBairro.text.toString(),
-                localidade = etCidade.text.toString(),
-                uf = etUf.text.toString(),
-                numero = etNumero.text.toString()
-            )
-
-            val intent = Intent(this, ConfirmacaoActivity::class.java)
-
-            intent.putExtra("endereco", endereco)
-
-            startActivity(intent)
+            abrirTelaConfirmacao()
         }
 
         btnHistorico.setOnClickListener {
+            Toast.makeText(this, "Histórico em desenvolvimento", Toast.LENGTH_SHORT).show()
+        }
+    }
 
+    private fun abrirTelaConfirmacao() {
+        // Validar campos obrigatórios
+        if (!validarCampos()) {
+            return
+        }
+
+        // Criar objeto Endereco
+        val endereco = Endereco(
+            cep = etCep.text.toString(),
+            logradouro = etLogradouro.text.toString(),
+            complemento = etComplemento.text.toString(),
+            bairro = etBairro.text.toString(),
+            localidade = etCidade.text.toString(),
+            uf = etUf.text.toString(),
+            numero = etNumero.text.toString()
+        )
+
+        // Abrir ConfirmacaoActivity com o launcher
+        val intent = Intent(this, ConfirmacaoActivity::class.java)
+        intent.putExtra("endereco", endereco)
+        confirmarLauncher.launch(intent)
+    }
+
+    private fun validarCampos(): Boolean {
+        return when {
+            etCep.text.isNullOrBlank() -> {
+                etCep.error = "Digite um CEP"
+                false
+            }
+            etLogradouro.text.isNullOrBlank() -> {
+                etLogradouro.error = "Busque um CEP primeiro"
+                false
+            }
+            etNumero.text.isNullOrBlank() -> {
+                etNumero.error = "Número é obrigatório"
+                false
+            }
+            else -> true
         }
     }
 
     private fun buscarCep() {
         val cep = etCep.text.toString().trim()
 
-        // Validação do CEP
         if (cep.isEmpty()) {
             mostrarErro("Por favor, digite um CEP")
             return
@@ -103,18 +139,12 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Limpar campos anteriores
         limparCamposEndereco()
-
-        // Mostrar ProgressBar
         mostrarCarregamento(true)
         esconderErro()
-
         buscarCepComCoroutines(cep)
     }
 
-
-    // Metodo: Usando Coroutines (recomendado)
     private fun buscarCepComCoroutines(cep: String) {
         lifecycleScope.launch {
             try {
@@ -143,14 +173,11 @@ class MainActivity : AppCompatActivity() {
         etCidade.setText(endereco.localidade)
         etUf.setText(endereco.uf)
 
-        // Se houver complemento na API, preenche
         if (endereco.complemento.isNotBlank()) {
             etComplemento.setText(endereco.complemento)
         }
 
-        // Focar no campo número para preenchimento manual
         etNumero.requestFocus()
-
         Toast.makeText(this, "Endereço encontrado!", Toast.LENGTH_SHORT).show()
     }
 
@@ -160,7 +187,34 @@ class MainActivity : AppCompatActivity() {
         etCidade.text?.clear()
         etUf.text?.clear()
         etComplemento.text?.clear()
+    }
+
+    // ============================================================
+    // MÉTODO PARA LIMPAR TODOS OS CAMPOS
+    // ============================================================
+    fun limparTodosCampos() {
+        etCep.text?.clear()
+        etLogradouro.text?.clear()
+        etBairro.text?.clear()
+        etCidade.text?.clear()
+        etUf.text?.clear()
         etNumero.text?.clear()
+        etComplemento.text?.clear()
+
+        // Limpar erros
+        etCep.error = null
+        etLogradouro.error = null
+        etBairro.error = null
+        etCidade.error = null
+        etUf.error = null
+        etNumero.error = null
+        etComplemento.error = null
+
+        // Esconder mensagem de erro
+        tvErro.visibility = View.GONE
+
+        // Focar no campo CEP
+        etCep.requestFocus()
     }
 
     private fun mostrarCarregamento(mostrar: Boolean) {
@@ -175,34 +229,5 @@ class MainActivity : AppCompatActivity() {
 
     private fun esconderErro() {
         tvErro.visibility = View.GONE
-    }
-
-    private fun confirmarEndereco() {
-        val cep = etCep.text.toString()
-        val logradouro = etLogradouro.text.toString()
-        val bairro = etBairro.text.toString()
-        val cidade = etCidade.text.toString()
-        val uf = etUf.text.toString()
-        val numero = etNumero.text.toString()
-        val complemento = etComplemento.text.toString()
-
-        // Validação básica
-        if (logradouro.isEmpty() || bairro.isEmpty() || cidade.isEmpty() ||
-            uf.isEmpty() || numero.isEmpty()) {
-            Toast.makeText(this, "Preencha todos os campos obrigatórios", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Aqui você pode salvar o endereço no banco de dados ou enviar para outra tela
-        val enderecoCompleto = """
-            Endereço confirmado:
-            CEP: $cep
-            Logradouro: $logradouro, $numero
-            Complemento: $complemento
-            Bairro: $bairro
-            Cidade: $cidade - $uf
-        """.trimIndent()
-
-        Toast.makeText(this, enderecoCompleto, Toast.LENGTH_LONG).show()
     }
 }
