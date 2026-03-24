@@ -10,7 +10,7 @@ interface ViaCepService {
     @GET("{cep}/json/")
     fun buscarEndereco(@Path("cep") cep: String): Call<Endereco>
 
-    // Versão com Coroutines
+    //Coroutines
     @GET("{cep}/json/")
     suspend fun buscarEnderecoCoroutines(@Path("cep") cep: String): Endereco
 }

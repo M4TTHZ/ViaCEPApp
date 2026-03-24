@@ -9,6 +9,6 @@ data class Endereco(
     val bairro: String,
     val localidade: String,
     val uf: String,
-    val erro: Boolean = false, // Para casos de CEP inválido
+    val erro: Boolean = false,
     val numero: String
 ) : Serializable

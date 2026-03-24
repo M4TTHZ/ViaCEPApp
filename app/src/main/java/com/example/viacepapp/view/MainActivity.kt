@@ -1,4 +1,4 @@
-package com.example.viacepapp
+package com.example.viacepapp.view
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,13 +11,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.example.viacepapp.Model.Endereco
+import com.example.viacepapp.R
+import com.example.viacepapp.Service.RetrofitClient
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.example.viacepapp.Model.Endereco
-import com.example.viacepapp.Service.RetrofitClient
-import com.example.viacepapp.view.ConfirmacaoActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -80,9 +80,7 @@ class MainActivity : AppCompatActivity() {
             abrirTelaConfirmacao()
         }
 
-        btnHistorico.setOnClickListener {
-            Toast.makeText(this, "Histórico em desenvolvimento", Toast.LENGTH_SHORT).show()
-        }
+        btnHistorico.setOnClickListener {}
     }
 
     private fun abrirTelaConfirmacao() {
@@ -102,7 +100,7 @@ class MainActivity : AppCompatActivity() {
             numero = etNumero.text.toString()
         )
 
-        // Abrir ConfirmacaoActivity com o launcher
+        // Iniciar ConfirmacaoActivity
         val intent = Intent(this, ConfirmacaoActivity::class.java)
         intent.putExtra("endereco", endereco)
         confirmarLauncher.launch(intent)
@@ -188,10 +186,6 @@ class MainActivity : AppCompatActivity() {
         etUf.text?.clear()
         etComplemento.text?.clear()
     }
-
-    // ============================================================
-    // MÉTODO PARA LIMPAR TODOS OS CAMPOS
-    // ============================================================
     fun limparTodosCampos() {
         etCep.text?.clear()
         etLogradouro.text?.clear()
