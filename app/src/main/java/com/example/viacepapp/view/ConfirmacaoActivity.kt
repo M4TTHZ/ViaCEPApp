@@ -70,6 +70,23 @@ class ConfirmacaoActivity : AppCompatActivity() {
         tvBairro.text = endereco.bairro
         tvCidadeUf.text = "${endereco.localidade} - ${endereco.uf}"
     }
+    private fun historico() {
+        val sharedPreferences = getSharedPreferences("EnderecoPrefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+
+        editor.putString("cep", endereco.cep)
+        editor.putString("logradouro", endereco.logradouro)
+        editor.putString("complemento", endereco.complemento)
+        editor.putString("bairro", endereco.bairro)
+        editor.putString("localidade", endereco.localidade)
+        editor.putString("uf", endereco.uf)
+        editor.putString("numero", endereco.numero)
+
+        editor.apply()
+
+        Toast.makeText(this, "Endereço salvo com sucesso!", Toast.LENGTH_SHORT).show()
+    }
 
     private fun configurarListeners() {
         // BOTÃO EDITAR - Volta normalmente (NÃO limpa campos)
@@ -79,8 +96,9 @@ class ConfirmacaoActivity : AppCompatActivity() {
         }
 
         btnConfirmar.setOnClickListener {
-            setResult(RESULT_CANCELED)  // RESULT_OK para NÃO limpar
-            finish()
+            val intent = Intent(this, HistoricoActivity::class.java)
+            historico()
+            startActivity(intent)
         }
 
         btnCancelar.setOnClickListener {

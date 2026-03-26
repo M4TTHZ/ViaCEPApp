@@ -80,7 +80,10 @@ class MainActivity : AppCompatActivity() {
             abrirTelaConfirmacao()
         }
 
-        btnHistorico.setOnClickListener {}
+        btnHistorico.setOnClickListener {
+            val intent = Intent(this, HistoricoActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun abrirTelaConfirmacao() {
